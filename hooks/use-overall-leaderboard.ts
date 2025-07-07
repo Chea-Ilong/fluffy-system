@@ -134,7 +134,7 @@ export function useOverallLeaderboard() {
   }, [fetchData])
 
   return {
-    overallData: filteredData,
+    leaderboardData: filteredData,
     loading,
     error,
     filters,
@@ -142,5 +142,6 @@ export function useOverallLeaderboard() {
     updateFilters,
     changePage,
     refetch: fetchData,
+    refreshing: loading,
   }
 }
