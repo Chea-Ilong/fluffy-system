@@ -8,12 +8,12 @@ import { LEADERBOARD_CONFIG } from "@/lib/constants"
 export function useOverallLeaderboard() {
   const [overallData, setOverallData] = useState<OverallEntry[]>([])
   const [filteredData, setFilteredData] = useState<OverallEntry[]>([])
-  const [loading, setLoading] = useState(typeof window === 'undefined' ? false : true)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<LeaderboardFilters>({
     search: "",
     group: "All",
-    participantsPerPage: LEADERBOARD_CONFIG?.DEFAULT_PARTICIPANTS_PER_PAGE || 50,
+    participantsPerPage: LEADERBOARD_CONFIG.DEFAULT_PARTICIPANTS_PER_PAGE,
   })
   const [pagination, setPagination] = useState<PaginationState>({
     currentTab: 1,
@@ -25,9 +25,6 @@ export function useOverallLeaderboard() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const fetchData = useCallback(async () => {
-    // Skip during server-side rendering
-    if (typeof window === 'undefined') return;
-    
     try {
       setLoading(true)
       setError(null)
@@ -93,17 +90,15 @@ export function useOverallLeaderboard() {
   }, [overallData, filters])
 
   const updateFilters = useCallback((newFilters: Partial<LeaderboardFilters>) => {
-    setFilters((prev) => {
-      const defaultParticipantsPerPage = LEADERBOARD_CONFIG?.DEFAULT_PARTICIPANTS_PER_PAGE || 50;
-      return {
-        ...prev,
-        ...newFilters,
-        // Ensure values are never undefined
-        search: newFilters.search ?? prev?.search ?? "",
-        group: newFilters.group ?? prev?.group ?? "All",
-        participantsPerPage: newFilters.participantsPerPage ?? prev?.participantsPerPage ?? defaultParticipantsPerPage,
-      };
-    })
+    setFilters((prev) => ({
+      ...prev,
+      ...newFilters,
+      // Ensure values are never undefined
+      search: newFilters.search ?? prev.search ?? "",
+      group: newFilters.group ?? prev.group ?? "All",
+      participantsPerPage:
+        newFilters.participantsPerPage ?? prev.participantsPerPage ?? LEADERBOARD_CONFIG.DEFAULT_PARTICIPANTS_PER_PAGE,
+    }))
     setPagination((prev) => ({ ...prev, currentPage: 1 }))
   }, [])
 
@@ -139,7 +134,7 @@ export function useOverallLeaderboard() {
   }, [fetchData])
 
   return {
-    leaderboardData: filteredData,
+    overallData: filteredData,
     loading,
     error,
     filters,
@@ -147,6 +142,5 @@ export function useOverallLeaderboard() {
     updateFilters,
     changePage,
     refetch: fetchData,
-    refreshing: loading,
   }
 }

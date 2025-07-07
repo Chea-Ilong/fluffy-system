@@ -12,13 +12,18 @@ import { Maximize2, Minimize2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function OverallLeaderboardPage() {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedGroup, setSelectedGroup] = useState<string>("all")
   const [isRevealed, setIsRevealed] = useState(false)
   const [showPodium, setShowPodium] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const { leaderboardData, loading, error, refetch, refreshing, filters, updateFilters } = useOverallLeaderboard()
+  const { leaderboardData, loading, error, refetch, refreshing } = useOverallLeaderboard()
 
-  // Use the filtered data directly from the hook
-  const filteredData = leaderboardData || []
+  const filteredData = leaderboardData.filter((entry) => {
+    const matchesSearch = entry.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesGroup = selectedGroup === "all" || entry.group === selectedGroup
+    return matchesSearch && matchesGroup
+  })
 
   const handleReveal = () => {
     if (isRevealed) {
@@ -51,11 +56,14 @@ export default function OverallLeaderboardPage() {
           <LeaderboardHeader title="Overall Leaderboard" subtitle="Combined Rankings from All Rounds" />
 
           <SearchAndFilters
-            filters={filters || { search: "", group: "All", participantsPerPage: 50 }}
-            onFiltersChange={(newFilters) => updateFilters && updateFilters(newFilters)}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedGroup={selectedGroup}
+            onGroupChange={setSelectedGroup}
             onRefresh={refetch}
-            totalResults={(leaderboardData && leaderboardData.length) || 0}
-            isRefreshing={refreshing || false}
+            isRefreshing={refreshing}
+            totalParticipants={leaderboardData.length}
+            filteredCount={filteredData.length}
             extraActions={
               <div className="flex gap-2">
                 <RevealButton onReveal={handleReveal} isRevealed={isRevealed} />
