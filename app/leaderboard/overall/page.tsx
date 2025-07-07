@@ -19,7 +19,7 @@ export default function OverallLeaderboardPage() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const { leaderboardData, loading, error, refetch, refreshing } = useOverallLeaderboard()
 
-  const filteredData = leaderboardData.filter((entry) => {
+  const filteredData = (leaderboardData || []).filter((entry) => {
     const matchesSearch = entry.fullName.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesGroup = selectedGroup === "all" || entry.group === selectedGroup
     return matchesSearch && matchesGroup
