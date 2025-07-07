@@ -62,7 +62,7 @@ export default function OverallLeaderboardPage() {
             onGroupChange={setSelectedGroup}
             onRefresh={refetch}
             isRefreshing={refreshing}
-            totalParticipants={leaderboardData.length}
+            totalParticipants={leaderboardData?.length || 0}
             filteredCount={filteredData.length}
             extraActions={
               <div className="flex gap-2">
