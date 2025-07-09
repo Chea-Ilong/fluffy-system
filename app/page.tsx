@@ -13,7 +13,7 @@ import { RevealButton } from "@/components/leaderboard/reveal-button"
 import { AnimatedPodium } from "@/components/leaderboard/animated-podium"
 
 export default function HomePage() {
-  const { overallData, loading, error, filters, pagination, updateFilters, changePage, refetch } =
+  const { leaderboardData, loading, error, filters, pagination, updateFilters, changePage, refetch } =
     useOverallLeaderboard()
 
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -41,7 +41,7 @@ export default function HomePage() {
     refetch().finally(() => setIsRefreshing(false))
   }
 
-  if (loading && overallData.length === 0) {
+  if (loading && (leaderboardData || []).length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-100 via-blue-50 to-indigo-100 py-8 lg:py-12">
         <div className="max-w-[1800px] mx-auto px-6 lg:px-8">
@@ -63,7 +63,7 @@ export default function HomePage() {
 
   const startIndex = (pagination.currentPage - 1) * filters.participantsPerPage
   const endIndex = startIndex + filters.participantsPerPage
-  const paginatedData = overallData.slice(startIndex, endIndex)
+  const paginatedData = (leaderboardData || []).slice(startIndex, endIndex)
 
   return (
     <>
@@ -81,7 +81,7 @@ export default function HomePage() {
             filters={filters}
             onFiltersChange={updateFilters}
             onRefresh={handleRefresh}
-            totalResults={overallData.length}
+            totalResults={(leaderboardData || []).length}
             isRefreshing={isRefreshing}
             showScoreFilter={true}
             extraActions={<RevealButton onReveal={handleReveal} isRevealed={isRevealed} />}
@@ -123,7 +123,7 @@ export default function HomePage() {
       </div>
 
       {/* Animated Podium */}
-      {showPodium && <AnimatedPodium data={overallData} onComplete={handlePodiumComplete} />}
+      {showPodium && <AnimatedPodium data={leaderboardData || []} onComplete={handlePodiumComplete} />}
     </>
   )
 }

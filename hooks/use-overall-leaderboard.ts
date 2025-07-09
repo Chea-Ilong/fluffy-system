@@ -9,6 +9,7 @@ export function useOverallLeaderboard() {
   const [overallData, setOverallData] = useState<OverallEntry[]>([])
   const [filteredData, setFilteredData] = useState<OverallEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState<LeaderboardFilters>({
     search: "",
@@ -24,9 +25,13 @@ export function useOverallLeaderboard() {
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isRefresh = false) => {
     try {
-      setLoading(true)
+      if (isRefresh) {
+        setRefreshing(true)
+      } else {
+        setLoading(true)
+      }
       setError(null)
 
       console.log("Fetching overall leaderboard data from custom API...")
@@ -58,6 +63,7 @@ export function useOverallLeaderboard() {
       console.error("Overall leaderboard fetch error:", err)
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }, [])
 
@@ -106,6 +112,10 @@ export function useOverallLeaderboard() {
     setPagination((prev) => ({ ...prev, currentPage: page }))
   }, [])
 
+  const refetch = useCallback(() => {
+    return fetchData(true)
+  }, [])
+
   // Initial data fetch
   useEffect(() => {
     fetchData()
@@ -134,13 +144,14 @@ export function useOverallLeaderboard() {
   }, [fetchData])
 
   return {
-    overallData: filteredData,
+    leaderboardData: filteredData,
     loading,
+    refreshing,
     error,
     filters,
     pagination,
     updateFilters,
     changePage,
-    refetch: fetchData,
+    refetch,
   }
 }
